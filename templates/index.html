@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <script type="text/javascript">
+    const NUM_CHECKBOXES = 10;
+    document.addEventListener("DOMContentLoaded", function() {
+      var targetContainer = document.getElementById("target_div");
+      var eventSource = new EventSource("/stream")
+      eventSource.onmessage = function(e) {
+        const checkboxState = JSON.parse(e.data);
+        // set checkboxes based on all 9 bools
+        for (var i = 0; i < NUM_CHECKBOXES; i++) {
+          var checkbox = document.getElementById('checkbox' + i);
+          checkbox.checked = checkboxState[i];
+        }
+      };
+
+      // create 9 checkboxes in the div
+      var checkboxes = document.getElementById('checkboxes');
+      for (var i = 0; i < NUM_CHECKBOXES; i++) {
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'checkbox' + i;
+        checkbox.value = 'value' + i;
+
+        // on check/uncheck, ping /set/(idx)/(value)
+        checkbox.onchange = function() {
+          var idx = this.id.replace('checkbox', '');
+          var value = this.checked;
+          fetch('/set/' + idx + '/' + (value ? '1' : '0'));
+        };
+
+        checkboxes.appendChild(checkbox);
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <div id='checkboxes'></div>
+
+</body>
+</html>
